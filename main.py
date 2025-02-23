@@ -3,6 +3,7 @@ import moderngl
 import pygame
 from pygame.locals import *
 from PIL import Image
+from random import randint
 
 WIN_SIZE = (1024, 720)
 
@@ -16,7 +17,7 @@ for i in range(WORLD_HEIGHT):
 
         # можешь генирацию написать
 
-        tiles.add((j,i,0,(0,0))) # (0,0) координаты текстуры на атласе
+        tiles.add((j,i,0,(randint(0,2),0))) # (0,0) координаты текстуры на атласе
 
 
 class WindowGame:
@@ -25,7 +26,9 @@ class WindowGame:
 
     def init(self):
         pygame.init()
-        pygame.display.set_mode(WIN_SIZE, DOUBLEBUF | OPENGL)
+        infoObject = pygame.display.Info()
+        WIN_SIZE = (1024,720)
+        pygame.display.set_mode(WIN_SIZE, DOUBLEBUF | OPENGL, vsync=2)
         self.ctx = moderngl.create_context()
 
         with open("shaders/shader_vert.glsl", "r", encoding='utf-8') as f:
@@ -50,16 +53,20 @@ class WindowGame:
             -1, 1,  # Верхний левый угол
         ], dtype='f4')
 
+
         # Индексы для отрисовки квадрата
         self.indices = np.array([
             0, 1, 2,  # Первый треугольник
             0, 2, 3  # Второй треугольник
         ], dtype='i4')
 
+
+
         # Создание VAO и VBO
         self.vbo = self.ctx.buffer(self.vertices)
         self.ibo = self.ctx.buffer(self.indices)
         self.vao = self.ctx.simple_vertex_array(self.shader_program, self.vbo, 'in_vert', index_buffer=self.ibo)
+
 
         self.clock = pygame.time.Clock()
         self.shader_program['u_resolution'].value = WIN_SIZE
